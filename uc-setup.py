@@ -20,6 +20,7 @@
 
 # COMMAND ----------
 
+# DBTITLE 1,widget assignment
 dbutils.widgets.text(name = "catalog_name", defaultValue="", label="Catalog Name")
 dbutils.widgets.text(name = "schema_name", defaultValue="synthea", label="Schema Name")
 
@@ -30,16 +31,19 @@ dbutils.widgets.text(name = "schema_name", defaultValue="synthea", label="Schema
 
 # COMMAND ----------
 
+# DBTITLE 1,retrieve catalog name
 catalog_name = dbutils.widgets.get(name = "catalog_name")
 catalog_name
 
 # COMMAND ----------
 
+# DBTITLE 1,create catalog
 # MAGIC %sql
 # MAGIC create catalog if not exists ${catalog_name};
 
 # COMMAND ----------
 
+# DBTITLE 1,use and check catalog
 # MAGIC %sql
 # MAGIC use catalog ${catalog_name};
 # MAGIC select current_catalog();
@@ -51,16 +55,19 @@ catalog_name
 
 # COMMAND ----------
 
+# DBTITLE 1,retrieve schema name
 schema_name = dbutils.widgets.get("schema_name")
 schema_name
 
 # COMMAND ----------
 
+# DBTITLE 1,create schema in catalog
 # MAGIC %sql
 # MAGIC create schema if not exists ${schema_name};
 
 # COMMAND ----------
 
+# DBTITLE 1,use and check schema
 # MAGIC %sql
 # MAGIC use schema ${schema_name};
 # MAGIC select current_schema();
@@ -72,6 +79,7 @@ schema_name
 
 # COMMAND ----------
 
+# DBTITLE 1,create volume
 # MAGIC %sql
 # MAGIC create volume if not exists synthetic_files_raw;
 
@@ -82,5 +90,6 @@ schema_name
 
 # COMMAND ----------
 
+# DBTITLE 1,check volume
 command = f"ls -R /Volumes/{catalog_name}/{schema_name}/synthetic_files_raw/"
 !{command}
