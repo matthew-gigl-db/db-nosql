@@ -10,17 +10,13 @@
 
 # MAGIC %md
 # MAGIC ***
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC ## Enable Java JDK 17
 # MAGIC
 # MAGIC Synthea requires that we use either Java JDK 11 or 17 in order to execute commands with its latest release as a JAR file.  
 # MAGIC
-# MAGIC The default Java runtime on Databricks clusters is version 8, however starting with DBR 13, versions 11 and 17 are also installed.  The next LTS version of Java will be 17, therefore its recommended that we use Java 17 for applications like this whenever possible.   In order to use Java 17 on your cluster you'll need to set an environment variable in the cluster's **Advanced Options** section.  
+# MAGIC The default Java runtime on Databricks clusters is version 8, however starting with DBR 13, versions 11 and 17 are also installed.  The next LTS version of Java will be 17, therefore its recommended that we use Java 17 for applications like this whenever possible.   In order to use Java 17 on your cluster you'll need to set an environment variable in the cluster's **Advanced Options** section.
 # MAGIC
-# MAGIC ![set JNAME in advanced options](./images/Java17EnvVariable.png)
+# MAGIC  <img src="https://github.com/matthew-gigl-db/db-nosql/blob/main/images/Java17EnvVariable.png?raw=true"> 
 # MAGIC
 # MAGIC More information may be found here: [https://docs.databricks.com/en/dev-tools/sdk-java.html#create-a-cluster-that-uses-jdk-17](https://docs.databricks.com/en/dev-tools/sdk-java.html#create-a-cluster-that-uses-jdk-17)
 
@@ -31,6 +27,7 @@
 
 # COMMAND ----------
 
+# DBTITLE 1,check java version
 # MAGIC %sh
 # MAGIC java -version
 
@@ -42,11 +39,13 @@
 
 # COMMAND ----------
 
+# DBTITLE 1,set db widgets
 dbutils.widgets.text(name = "catalog_name", defaultValue="", label="Catalog Name")
 dbutils.widgets.text(name = "schema_name", defaultValue="synthea", label="Schema Name")
 
 # COMMAND ----------
 
+# DBTITLE 1,retrieve widget values
 catalog_name = dbutils.widgets.get(name = "catalog_name")
 schema_name = dbutils.widgets.get(name = "schema_name")
 volume_path = f"/Volumes/{catalog_name}/{schema_name}/synthetic_files_raw/"
@@ -64,10 +63,12 @@ print(f"""
 
 # COMMAND ----------
 
+# DBTITLE 1,import urlretrieve
 from urllib.request import urlretrieve
 
 # COMMAND ----------
 
+# DBTITLE 1,download latest synthea release
 urlretrieve(
   url = "https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/synthea-with-dependencies.jar"
   ,filename = f"{volume_path}synthea-with-dependencies.jar"
@@ -81,6 +82,7 @@ urlretrieve(
 
 # COMMAND ----------
 
+# DBTITLE 1,check installation
 command = f"""
 cd {volume_path}
 java -jar synthea-with-dependencies.jar
@@ -88,4 +90,5 @@ java -jar synthea-with-dependencies.jar
 
 # COMMAND ----------
 
+# DBTITLE 1,run command
 !{command}
