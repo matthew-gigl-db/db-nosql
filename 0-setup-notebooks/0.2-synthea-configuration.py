@@ -35,3 +35,10 @@ print(f"""
   schema_name = {schema_name}
   volume_path = {volume_path}
 """)
+
+# COMMAND ----------
+
+dbutils.widgets.dropdown(name = "ccda", defaultValue=False, choices=(True, False), label="CCDA Export")
+dbutils.widgets.dropdown(name = "fhir", defaultValue=False, choices=(True, False), label="FHIR Export")
+dbutils.widgets.dropdown(name = "csv", defaultValue=True, choices=(True, False), label="CSV Export")
+dbutils.widgets.dropdown(name = "csv_folder_per_run", defaultValue=True, choices=(True, False), label="CSV Folder Per Run")
