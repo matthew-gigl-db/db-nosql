@@ -16,9 +16,20 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Verify Java Version
-# MAGIC %sh 
-# MAGIC java -version
+# DBTITLE 1,Retrieve Java Version
+import os
+
+# verify the java version is greater than 17.  
+java_version = os.popen("java --version").read()
+print(java_version)
+
+# COMMAND ----------
+
+# DBTITLE 1,Verify Version 17
+if java_version.split(" ")[1].startswith("17"):
+  print("Java Version is set correctly with version 17+")
+else: 
+  raise Exception("Error: Please ensure that java version 17 is set as the cluster default.  Please see https://docs.databricks.com/en/dev-tools/sdk-java.html#create-a-cluster-that-uses-jdk-17 for more information.")
 
 # COMMAND ----------
 
