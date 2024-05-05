@@ -16,7 +16,9 @@
 
 # COMMAND ----------
 
-
+# DBTITLE 1,Verify Java Version
+# MAGIC %sh 
+# MAGIC java -version
 
 # COMMAND ----------
 
