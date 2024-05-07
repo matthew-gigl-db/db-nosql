@@ -16,12 +16,9 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Import Python Modules
+# DBTITLE 1,Retrieve Java Version
 import subprocess
 
-# COMMAND ----------
-
-# DBTITLE 1,Retrieve Java Version
 result = subprocess.run(["java", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 java_version = result.stdout + result.stderr
 print(java_version)
@@ -83,11 +80,13 @@ print(f"""
 
 # COMMAND ----------
 
+# DBTITLE 1,Widget configuration for random record count
 dbutils.widgets.text(name = "min_records", defaultValue="1", label = "Minimum Generated Record Count")
 dbutils.widgets.text(name = "max_records", defaultValue="1000", label = "Maximum Generated Record Count")
 
 # COMMAND ----------
 
+# DBTITLE 1,Check minimum record is an integer
 # Check if "min_records" is an integer
 try:
   min_records = int(dbutils.widgets.get("min_records"))
@@ -97,9 +96,58 @@ min_records
 
 # COMMAND ----------
 
+# DBTITLE 1,Check maximum record is an integer
 # Check if "max_records" is an integer
 try:
   max_records = int(dbutils.widgets.get("max_records"))
 except ValueError:
   raise Exception("Please set the maximum generated record count to an integer value")
 max_records
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC *** 
+# MAGIC ### Data Generation Function 
+
+# COMMAND ----------
+
+from random import randint
+
+# COMMAND ----------
+
+def data_generator(volume_path: str = volume_path, config_file_path: str = f"{volume_path}synthea_config.txt", min_record_cnt: int = min_records, max_record_cnt: int = max_records, additional_options: str = "", verbose: bool = False):
+  random_record_count = random.randint(min_records, max_records)
+  command = (
+  f"""cd {volume_path}
+  java -jar synthea-with-dependencies.jar -c {config_file_path} -p {random_record_count} {additional_options}
+  """)
+  if verbose == True:
+    print(command)
+  result = subprocess.run([command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+  return result
+
+# COMMAND ----------
+
+# MAGIC %md 
+# MAGIC ***
+# MAGIC ### Generate Records
+
+# COMMAND ----------
+
+run_results = data_generator(
+  volume_path=volume_path
+  ,config_file_path=f"{volume_path}synthea_config.txt"
+  ,min_record_cnt=min_records
+  ,max_record_cnt=max_records
+  ,additional_options=""
+  ,verbose=True
+)
+
+# COMMAND ----------
+
+print(run_results.stderr)
+
+# COMMAND ----------
+
+print(run_results.stdout)
