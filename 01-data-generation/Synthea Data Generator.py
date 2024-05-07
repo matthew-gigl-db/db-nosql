@@ -16,12 +16,29 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Retrieve Java Version
-import os
+# DBTITLE 1,import python modules
+import subprocess
 
-# verify the java version is greater than 17.  
-java_version = os.popen("java --version").read()
+# COMMAND ----------
+
+result = subprocess.run(["java", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+# COMMAND ----------
+
+java_version = result.stdout + result.stderr
 print(java_version)
+
+# COMMAND ----------
+
+# MAGIC %md 
+# MAGIC Typical output using default cluster JDK: 
+# MAGIC > openjdk version "1.8.0_392"  
+# MAGIC > OpenJDK Runtime Environment (Zulu 8.74.0.17-CA-linux64) (build 1.8.0_392-b08)  
+# MAGIC > OpenJDK 64-Bit Server VM (Zulu 8.74.0.17-CA-linux64) (build 25.392-b08, mixed mode)  
+# MAGIC
+# MAGIC Output when the cluster JDK is set to version 17:  
+# MAGIC >  
+# MAGIC >  
 
 # COMMAND ----------
 
