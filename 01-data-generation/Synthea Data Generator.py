@@ -112,10 +112,12 @@ max_records
 
 # COMMAND ----------
 
+# DBTITLE 1,import randint function
 from random import randint
 
 # COMMAND ----------
 
+# DBTITLE 1,Data Generator for Synthea
 def data_generator(volume_path: str = volume_path, config_file_path: str = f"{volume_path}synthea_config.txt", min_record_cnt: int = min_records, max_record_cnt: int = max_records, additional_options: str = "", verbose: bool = False):
   random_record_count = random.randint(min_records, max_records)
   command = (
@@ -135,6 +137,7 @@ def data_generator(volume_path: str = volume_path, config_file_path: str = f"{vo
 
 # COMMAND ----------
 
+# DBTITLE 1,run data generator
 run_results = data_generator(
   volume_path=volume_path
   ,config_file_path=f"{volume_path}synthea_config.txt"
@@ -146,8 +149,10 @@ run_results = data_generator(
 
 # COMMAND ----------
 
+# DBTITLE 1,Get stderr from run_results
 print(run_results.stderr)
 
 # COMMAND ----------
 
+# DBTITLE 1,Print Run Results
 print(run_results.stdout)
