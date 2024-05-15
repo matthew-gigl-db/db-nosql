@@ -1,16 +1,22 @@
 # Databricks notebook source
+dbutils.widgets.dropdown(name = "env_mode", defaultValue = "prd", choices = ["dev", "tst", "uat", "prd"], label = "Environment Mode")
 dbutils.widgets.text(name = "catalog_name", defaultValue="", label="Catalog Name")
 dbutils.widgets.text(name = "schema_name", defaultValue="synthea", label="Schema Name")
+dbutils.widgets.text(name = "volume_name", defaultValue="synthetic_files_raw", label="Volume Name")
 
 # COMMAND ----------
 
+env_mode = dbutils.widgets.get(name = "env_mode")
 catalog_name = dbutils.widgets.get(name = "catalog_name")
 schema_name = dbutils.widgets.get(name = "schema_name")
-volume_path = f"/Volumes/{catalog_name}/{schema_name}/synthetic_files_raw/"
+volume_name = dbutils.widgets.get(name = "volume_name")
+volume_path = f"/Volumes/{catalog_name}/{schema_name}/{volume_name}/"
 print(f"""
-  catalog_name = {catalog_name}
-  schema_name = {schema_name}
-  volume_path = {volume_path}
+    env_mode = {env_mode}
+    catalog_name = {catalog_name}
+    schema_name = {schema_name}
+    volume_name = {volume_name}
+    volume_path = {volume_path}
 """)
 
 # COMMAND ----------
@@ -89,7 +95,7 @@ class IngestionDLT:
             self.catalog_set = f"{self.catalog}_{self.env_mode}"
 
     def __repr__(self):
-        return f"""IngestionDLT(env_mode='{self.env_mode}', catalog='{self.catalog}', schema='{self.schema}', volume='{self.volume}')"""
+        return f"""IngestionDLT(env_mode='{self.env_mode}', catalog='{self.catalog_set}', schema='{self.schema}', volume='{self.volume}')"""
 
     def ingest_raw_to_bronze(self, table_name: str, table_comment: str, table_properties: dict, source_folder_path_from_volume: str = "", maxFiles: int = 1000, maxBytes: str = "10g", wholeText: bool = True, options: dict = None):
         """
@@ -130,7 +136,7 @@ class IngestionDLT:
         
     def ingest_raw_to_bronze_synchronous(self, table_names: list, table_comments: list, table_properties: dict, source_folder_path_from_volumes: str, maxFiles: int = 1000, maxBytes: str = "10g", wholeText: bool = True, options: dict = None):
         """
-            Synchronously inget from multiple subfolders of the same Volume into more than one bronze table.  Each bronze table created is managed as a streaming Delta Live Table in the same <catalog.schema> as the source volume.  
+            Synchronously ingest from multiple subfolders of the same Volume into more than one bronze table.  Each bronze table created is managed as a streaming Delta Live Table in the same <catalog.schema> as the source volume.  
         """
         for i in range(0,len(table_names)):
             ingest_raw_to_bronze(self = self, table_name = table_names[i], table_comment = table_comments[i], source_folder_path_from_volume = source_folder_path_from_volumes[i], table_properties = table_properties, maxFiles = maxFiles, maxBytes = maxBytes, wholeText = wholeText, options = options)
@@ -141,9 +147,9 @@ class IngestionDLT:
 Pipeline = IngestionDLT(
     spark = spark
     ,env_mode = env_mode
-    ,catalog = "lakehouse"
-    ,schema = "landing"
-    ,volume = 'dropbox'
+    ,catalog = catalog_name
+    ,schema = schema_name
+    ,volume = volume_name
 )
 
 # COMMAND ----------
@@ -156,13 +162,9 @@ display(spark.sql("select current_catalog(), current_schema()"))
 
 # COMMAND ----------
 
-# Pipeline.ingest_raw_to_bronze(
-#     table_name="dropbox_bronze"
-#     ,table_comment="A full text record of every file that has landed in our dropbox folder."
-#     ,table_properties=None
-#     ,source_folder_path_from_volume=""
-# )
-
-# COMMAND ----------
-
-
+Pipeline.ingest_raw_to_bronze(
+    table_name="synthea_csv_bronze"
+    ,table_comment="A full text record of every file that has landed in our raw synthea landing folder."
+    ,table_properties={"quality":"bronze"}
+    ,source_folder_path_from_volume="output/csv"
+)
