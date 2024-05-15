@@ -1,5 +1,8 @@
 # Databricks notebook source
 import dlt
+
+# COMMAND ----------
+
 from pyspark.sql.functions import *
 from pyspark.sql import DataFrame
 from pyspark.sql.session import SparkSession
