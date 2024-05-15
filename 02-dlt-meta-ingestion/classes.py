@@ -4,7 +4,7 @@ class IngestionDLT:
 
     def __init__(
         self
-        ,spark: SparkSession = spark
+        ,spark: SparkSession # = spark
         ,env_mode: str = "dev"
         ,catalog: str = "lakehouse"
         ,schema: str = "landing"
