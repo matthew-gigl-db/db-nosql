@@ -1,4 +1,7 @@
-import operations 
+# Databricks notebook source
+# MAGIC %run "./operations"
+
+# COMMAND ----------
 
 class IngestionDLT:
 
@@ -68,3 +71,4 @@ class IngestionDLT:
         """
         for i in range(0,len(table_names)):
             ingest_raw_to_bronze(self = self, table_name = table_names[i], table_comment = table_comments[i], source_folder_path_from_volume = source_folder_path_from_volumes[i], table_properties = table_properties, maxFiles = maxFiles, maxBytes = maxBytes, wholeText = wholeText, options = options)
+

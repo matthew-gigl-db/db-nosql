@@ -1,9 +1,15 @@
+# Databricks notebook source
 import dlt
 from pyspark.sql.functions import *
+
+# COMMAND ----------
+
 from pyspark.sql import DataFrame
 from pyspark.sql.session import SparkSession
 from pyspark.sql.streaming import DataStreamReader, DataStreamWriter
 from typing import Callable
+
+# COMMAND ----------
 
 # set the catalog and schema 
 def use_catalog_schema(catalog: str, schema: str, env_mode: str = "dev", verbose: bool = False):
@@ -16,7 +22,9 @@ def use_catalog_schema(catalog: str, schema: str, env_mode: str = "dev", verbose
     spark.sql(f"""use schema {schema};""")
     if verbose:
         return spark.sql("""select current_catalog(), current_schema();""")
-      
+
+# COMMAND ----------
+
 def read_stream_raw(spark: SparkSession, path: str, maxFiles: int, maxBytes: str, wholeText: bool = True, options: dict = None) -> DataFrame:
     stream_schema = "value STRING"
     read_stream = (
@@ -39,4 +47,3 @@ def read_stream_raw(spark: SparkSession, path: str, maxFiles: int, maxBytes: str
     )
 
     return read_stream
-

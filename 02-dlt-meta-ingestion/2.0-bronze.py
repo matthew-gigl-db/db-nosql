@@ -1,10 +1,14 @@
 # Databricks notebook source
 import dlt
-# from pyspark.sql.functions import *
+import classes
 
 # COMMAND ----------
 
-# MAGIC %run "./classes"
+# %run "./operations"
+
+# COMMAND ----------
+
+# %run "./classes"
 
 # COMMAND ----------
 
