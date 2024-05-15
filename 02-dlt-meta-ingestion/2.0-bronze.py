@@ -1,24 +1,17 @@
 # Databricks notebook source
-dbutils.widgets.dropdown("env_mode", "dev", ("dev", "tst", "prd"), "Environment")
-dbutils.widgets.text("catalog", "lakehouse", "Catalog")
-dbutils.widgets.text("schema", "landing", "Schema")
-dbutils.widgets.text("volume", "dropbox", "Volume")
+dbutils.widgets.text(name = "catalog_name", defaultValue="", label="Catalog Name")
+dbutils.widgets.text(name = "schema_name", defaultValue="synthea", label="Schema Name")
 
 # COMMAND ----------
 
-env_mode = dbutils.widgets.get("env_mode")
-catalog = dbutils.widgets.get("catalog")
-schema = dbutils.widgets.get("schema")
-volume = dbutils.widgets.get("volume")
-print(
-f"""
-Notebook Variables Set:
-    env_mode = {env_mode}
-    catalog = {catalog}
-    schema = {schema}
-    volume = {volume}
-"""
-)
+catalog_name = dbutils.widgets.get(name = "catalog_name")
+schema_name = dbutils.widgets.get(name = "schema_name")
+volume_path = f"/Volumes/{catalog_name}/{schema_name}/synthetic_files_raw/"
+print(f"""
+  catalog_name = {catalog_name}
+  schema_name = {schema_name}
+  volume_path = {volume_path}
+""")
 
 # COMMAND ----------
 
