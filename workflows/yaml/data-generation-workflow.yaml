@@ -1,0 +1,73 @@
+resources:
+  jobs:
+    mgiglia_synthea_data_generation:
+      name: mgiglia-synthea-data-generation
+      tasks:
+        - task_key: synthea_set_up_check
+          notebook_task:
+            notebook_path: /Workspace/Users/matthew.giglia@databricks.com/db-nosql/00-setup-notebooks/set-up-check
+            source: WORKSPACE
+          job_cluster_key: mg-synthea-data-gen
+        - task_key: result_conditional
+          depends_on:
+            - task_key: synthea_set_up_check
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.[synthea_set_up_check].values.[result]}}"
+            right: "True"
+        - task_key: uc-setup
+          depends_on:
+            - task_key: result_conditional
+              outcome: "false"
+          notebook_task:
+            notebook_path: /Workspace/Users/matthew.giglia@databricks.com/db-nosql/00-setup-notebooks/0.0-uc-setup
+            source: WORKSPACE
+          job_cluster_key: mg-synthea-data-gen
+        - task_key: install-synthea
+          depends_on:
+            - task_key: uc-setup
+          notebook_task:
+            notebook_path: /Workspace/Users/matthew.giglia@databricks.com/db-nosql/00-setup-notebooks/0.1-install-synthea
+            source: WORKSPACE
+          job_cluster_key: mg-synthea-data-gen
+        - task_key: configure-synthea
+          depends_on:
+            - task_key: install-synthea
+          notebook_task:
+            notebook_path: /Workspace/Users/matthew.giglia@databricks.com/db-nosql/00-setup-notebooks/0.2-synthea-configuration
+            source: WORKSPACE
+          job_cluster_key: mg-synthea-data-gen
+        - task_key: generate_synthetic_data
+          depends_on:
+            - task_key: result_conditional
+              outcome: "true"
+            - task_key: configure-synthea
+          run_if: AT_LEAST_ONE_SUCCESS
+          notebook_task:
+            notebook_path: /Workspace/Users/matthew.giglia@databricks.com/db-nosql/01-data-generation/1.0-synthea-data-generator
+            source: WORKSPACE
+          job_cluster_key: mg-synthea-data-gen
+      job_clusters:
+        - job_cluster_key: mg-synthea-data-gen
+          new_cluster:
+            cluster_name: ""
+            spark_version: 14.3.x-scala2.12
+            spark_conf:
+              spark.master: local[*, 4]
+              spark.databricks.cluster.profile: singleNode
+            custom_tags:
+              ResourceClass: SingleNode
+            spark_env_vars:
+              JNAME: zulu17-ca-amd64
+            instance_pool_id: 0727-104344-hauls13-pool-uftxk0r6
+            driver_instance_pool_id: 0727-104344-hauls13-pool-uftxk0r6
+            data_security_mode: SINGLE_USER
+            runtime_engine: STANDARD
+            num_workers: 0
+      queue:
+        enabled: true
+      parameters:
+        - name: catalog_name
+          default: mgiglia
+        - name: schema_name
+          default: synthea
