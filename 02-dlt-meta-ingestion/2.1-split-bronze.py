@@ -1,39 +1,9 @@
 # Databricks notebook source
-# MAGIC %md
-# MAGIC # DLT Bronze Autoloader Ingestion - Dropbox
-# MAGIC ***
-# MAGIC
-# MAGIC This notebook automatically streams in any files that have been landed in the configured volume as a full text key value pair brone quality table with the following schema:  
-# MAGIC
-# MAGIC * **fullFilePath** 
-# MAGIC * **datasource**
-# MAGIC * **inputFileName**
-# MAGIC * **ingestTime**
-# MAGIC * **ingestDate**
-# MAGIC * **value**
-# MAGIC * **fileMetadata**
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC *** 
-# MAGIC
-# MAGIC Import dlt and the operations and classes defined for the pipeline.  
-
-# COMMAND ----------
-
 import dlt
 
 # COMMAND ----------
 
 from classDefinitions import *
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ***
-# MAGIC
-# MAGIC For development purposes only, uncommment the below code to manually set the Spark Conf Variables using Databricks Widgets.  
 
 # COMMAND ----------
 
@@ -54,13 +24,6 @@ from classDefinitions import *
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ***
-# MAGIC
-# MAGIC Retreive inputs for the DLT run from the Spark Conf. 
-
-# COMMAND ----------
-
 env_mode = spark.conf.get("workflow_inputs.env_mode")
 catalog_name = spark.conf.get("workflow_inputs.catalog_name")
 schema_name = spark.conf.get("workflow_inputs.schema_name")
@@ -73,13 +36,6 @@ print(f"""
     volume_name = {volume_name}
     volume_path = {volume_path}
 """)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ***
-# MAGIC
-# MAGIC Initialize the pipeline as an IngestionDLT class object.  
 
 # COMMAND ----------
 
@@ -97,22 +53,7 @@ Pipeline
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC ***
-# MAGIC
-# MAGIC Ingest the raw files into a key-value pair bronze table.  
-
-# COMMAND ----------
-
-Pipeline.ingest_raw_to_bronze(
-    table_name="synthea_csv_bronze"
-    ,table_comment="A full text record of every file that has landed in our raw synthea landing folder."
-    ,table_properties={"quality":"bronze", "phi":"True", "pii":"True", "pci":"False"}
-    ,source_folder_path_from_volume="output/csv"
-)
-
-# COMMAND ----------
-
-Pipeline.list_dropbox_files(
+Pipeline.split_bronze_table_synchronous(
   bronze_table = "synthea_csv_bronze"
+  ,live = False
 )

@@ -1,0 +1,16 @@
+resources:
+  jobs:
+    mgiglia_synthea_meta_ingestion:
+      name: mgiglia-synthea-meta-ingestion
+      tasks:
+        - task_key: dropbox
+          pipeline_task:
+            pipeline_id: cb0e63ae-59ea-476e-9a28-4ba617a28ec5
+            full_refresh: false
+        - task_key: dropbox_split
+          depends_on:
+            - task_key: dropbox
+          pipeline_task:
+            pipeline_id: 3e77520d-caef-4d5d-a3f9-9424fbdb9540
+      queue:
+        enabled: true

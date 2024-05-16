@@ -117,3 +117,59 @@ class IngestionDLT:
         """
         for i in range(0,len(table_names)):
             ingest_raw_to_bronze(self = self, table_name = table_names[i], table_comment = table_comments[i], source_folder_path_from_volume = source_folder_path_from_volumes[i], table_properties = table_properties, maxFiles = maxFiles, maxBytes = maxBytes, wholeText = wholeText, options = options)
+
+    def list_dropbox_files(self, bronze_table: str): 
+        """
+            This method assumes that files dropped in the same landing volume with similiar filenames are of the same schema and should be moved to their own bronze table for further processing.  Note that use of this method is optional for the pipeline and works best when the files have the same name but are organzied by folders to differentiate dates arrived (typically paritions).  Do not use if every file name is unique.    
+        """
+        @dlt.table(
+            name = "temp_landed_bronze_files"
+            ,comment = "Temporary table containing the distinct filename types loaded from the dropbox."
+            ,temporary = False
+            ,table_properties = None
+        )
+        def temp_bronze_files(spark = self.spark, bronze_table = bronze_table):
+            return (spark.sql(f"""select distinct inputFileName from LIVE.{bronze_table}"""))
+        
+    def split_bronze_table(self, bronze_table: str, filename: str, table_name: str, live: bool = True):
+        @dlt.table(
+            name = f"{table_name}_bronze"
+            ,comment = f"Bronze table of every {filename} landed from associated {bronze_table}."
+            ,temporary = False
+            ,table_properties = None # Note-- this should be inherited from the source bronze table.
+        )
+        def split_bronze(spark = self.spark, bronze_table = bronze_table, filename = filename): 
+            if live == True:  
+                return (spark.sql(f"""select * from LIVE.{bronze_table} where inputFileName = '{filename}'"""))
+            else:
+                return (spark.sql(f"""select * from {self.catalog_set}.{self.schema}.{bronze_table} where inputFileName = '{filename}'"""))
+        
+    def split_bronze_table_synchronous(self, bronze_table: str, live: bool = True):
+        
+        if live == True:  
+            filenames = self.spark.sql(f"select distinct * from LIVE.temp_landed_bronze_files").collect()
+        else:  
+            filenames = self.spark.sql(f"select distinct * from {self.catalog_set}.{self.schema}.temp_landed_bronze_files").collect()
+        
+        filenames_list = [row.inputFileName for row in filenames]
+            
+        for filename in filenames_list:
+            name = filename.replace(".", "_")
+            self.split_bronze_table(bronze_table = bronze_table, filename = filename, table_name = name, live = live)
+        
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
