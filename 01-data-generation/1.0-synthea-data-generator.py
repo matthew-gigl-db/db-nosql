@@ -119,7 +119,7 @@ from random import randint
 
 # DBTITLE 1,Data Generator for Synthea
 def data_generator(volume_path: str = volume_path, config_file_path: str = f"{volume_path}synthea_config.txt", min_record_cnt: int = min_records, max_record_cnt: int = max_records, additional_options: str = "", verbose: bool = False):
-  random_record_count = random.randint(min_records, max_records)
+  random_record_count = randint(min_records, max_records)
   command = (
   f"""cd {volume_path}
   java -jar synthea-with-dependencies.jar -c {config_file_path} -p {random_record_count} {additional_options}

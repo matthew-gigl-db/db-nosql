@@ -91,4 +91,4 @@ java -jar synthea-with-dependencies.jar
 # COMMAND ----------
 
 # DBTITLE 1,run command
-!{command}
+# !{command}
