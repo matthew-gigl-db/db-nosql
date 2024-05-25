@@ -116,3 +116,19 @@ Pipeline.ingest_raw_to_bronze(
 Pipeline.list_dropbox_files(
   bronze_table = "synthea_csv_bronze"
 )
+
+# COMMAND ----------
+
+# filenames = spark.sql(f"select distinct * from {catalog_name}.{schema_name}.temp_landed_bronze_files").collect()
+# filenames_list = [row.inputFileName for row in filenames]
+# filenames_list
+
+# COMMAND ----------
+
+filenames_list = ("encounters.csv", "allergies.csv", "imaging_studies.csv", "providers.csv", "medications.csv", "patients.csv", "immunizations.csv", "payer_transitions.csv", "conditions.csv", "observations.csv", "claims_transactions.csv", "careplans.csv", "supplies.csv", "procedures.csv", "devices.csv", "payers.csv", "claims.csv", "organizations.csv")
+
+# COMMAND ----------
+
+for filename in filenames_list:
+  name = filename.replace(".", "_")
+  Pipeline.split_bronze_table(bronze_table = "synthea_csv_bronze", filename = filename, table_name = name, live = True)

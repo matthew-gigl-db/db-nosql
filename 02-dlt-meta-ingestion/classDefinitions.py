@@ -125,24 +125,51 @@ class IngestionDLT:
         @dlt.table(
             name = "temp_landed_bronze_files"
             ,comment = "Temporary table containing the distinct filename types loaded from the dropbox."
-            ,temporary = False
+            ,temporary = True
             ,table_properties = None
         )
         def temp_bronze_files(spark = self.spark, bronze_table = bronze_table):
             return (spark.sql(f"""select distinct inputFileName from LIVE.{bronze_table}"""))
         
     def split_bronze_table(self, bronze_table: str, filename: str, table_name: str, live: bool = True):
-        @dlt.table(
+        dlt.create_streaming_table(
             name = f"{table_name}_bronze"
             ,comment = f"Bronze table of every {filename} landed from associated {bronze_table}."
-            ,temporary = False
-            ,table_properties = None # Note-- this should be inherited from the source bronze table.
+            # ,spark_conf={"<key>" : "<value", "<key" : "<value>"}
+            # ,table_properties={"<key>" : "<value>", "<key>" : "<value>"}
+            ,table_properties = None 
+            # ,partition_cols=["<partition-column>", "<partition-column>"]
+            ,partition_cols = None
+            # ,path="<storage-location-path>"
+            # ,schema="schema-definition"
+            # ,expect_all = {"<key>" : "<value", "<key" : "<value>"}
+            # ,expect_all_or_drop = {"<key>" : "<value", "<key" : "<value>"}
+            # ,expect_all_or_fail = {"<key>" : "<value", "<key" : "<value>"}
         )
+
+        @dlt.append_flow(
+            target = f"{table_name}_bronze"
+            ,name = f"{table_name}_bronze_append_flow" # optional, defaults to function name
+            # ,spark_conf = {"<key>" : "<value", "<key" : "<value>"} # optional
+            # ,comment = "<comment>" # optional
+        ) 
         def split_bronze(spark = self.spark, bronze_table = bronze_table, filename = filename): 
-            if live == True:  
-                return (spark.sql(f"""select * from LIVE.{bronze_table} where inputFileName = '{filename}'"""))
-            else:
-                return (spark.sql(f"""select * from {self.catalog_set}.{self.schema}.{bronze_table} where inputFileName = '{filename}'"""))
+            # return dlt.streaming_read(bronze_table).where(col("inputFileName") == lit(filename))
+            # return (dlt.read(bronze_table).where(col("inputFileName") == lit(filename)))
+            return spark.readStream.table(f"LIVE.{bronze_table}").where(col("inputFileName") == lit(filename))
+
+        # @dlt.table(
+        #     name = f"{table_name}_bronze"
+        #     ,comment = f"Bronze table of every {filename} landed from associated {bronze_table}."
+        #     ,temporary = False
+        #     ,table_properties = None # Note-- this should be inherited from the source bronze table.
+        # )
+        # def split_bronze(spark = self.spark, bronze_table = bronze_table, filename = filename): 
+        #     if live == True:  
+        #         return (dlt.read(bronze_table).where(col("inputFileName") == lit(filename)))
+        #     # (spark.sql(f"""select * from LIVE.{bronze_table} where inputFileName = '{filename}'"""))
+        #     else:
+        #         return (spark.sql(f"""select * from {self.catalog_set}.{self.schema}.{bronze_table} where inputFileName = '{filename}'"""))
         
     def split_bronze_table_synchronous(self, bronze_table: str, live: bool = True):
         
